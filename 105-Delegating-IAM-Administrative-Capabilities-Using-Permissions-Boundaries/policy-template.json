@@ -1,0 +1,88 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DenyPBDelete",
+            "Effect": "Deny",
+            "Action": "iam:DeleteRolePermissionsBoundary",
+            "Resource": "*"
+        },
+        {
+            "Sid": "IAMRead",
+            "Effect": "Allow",
+            "Action": [
+                "iam:Get*",
+                "iam:List*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "IAMPolicies",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreatePolicy",
+                "iam:DeletePolicy",
+                "iam:CreatePolicyVersion",
+                "iam:DeletePolicyVersion",
+                "iam:SetDefaultPolicyVersion"
+            ],
+            "Resource": "arn:aws:iam::AWS_ACCOUNT_ID:policy/AWSCookbook*"
+        },
+        {
+            "Sid": "IAMRolesWithBoundary",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:PutRolePolicy",
+                "iam:DeleteRolePolicy",
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy"
+            ],
+            "Resource": [
+                "arn:aws:iam::AWS_ACCOUNT_ID:role/AWSCookbook*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "iam:PermissionsBoundary": "arn:aws:iam::AWS_ACCOUNT_ID:policy/AWSCookbook105PB"
+                }
+            }
+        },
+        {
+            "Sid": "ServerlessFullAccess",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:*",
+                "logs:*",
+                "dynamodb:*",
+                "s3:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "PassRole",
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": "arn:aws:iam::AWS_ACCOUNT_ID:role/AWSCookbook*",
+            "Condition": {
+                "StringLikeIfExists": {
+                    "iam:PassedToService": "lambda.amazonaws.com"
+                }
+            }
+        },
+        {
+            "Sid": "ProtectPB",
+            "Effect": "Deny",
+            "Action": [
+                "iam:CreatePolicyVersion",
+                "iam:DeletePolicy",
+                "iam:DeletePolicyVersion",
+                "iam:SetDefaultPolicyVersion"
+            ],
+            "Resource": [
+                "arn:aws:iam::AWS_ACCOUNT_ID:policy/AWSCookbook105PB",
+                "arn:aws:iam::AWS_ACCOUNT_ID:policy/AWSCookbook105Policy"
+            ]
+        }
+    ]
+}
