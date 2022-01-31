@@ -1,4 +1,17 @@
 # Connecting to EC2 Instances Using AWS SSM Session Manager
+
+
+## Problem
+You have an EC2 instance in a private subnet and need to connect to the instance without using SSH over the internet. 
+
+## Solution
+Create an IAM role, attach the `AmazonSSMManagedInstanceCore` policy, create an EC2 instance profile, attach the IAM role you created to the instance profile, associate the EC2 instance profile to an EC2 instance, and finally, run the `aws ssm start-session` command to connect to the instance. A logical flow of these steps is shown in Figure 1-8.
+
+Prerequisites
+* Amazon Virtual Private Cloud (VPC) with isolated or private subnets and associated route tables
+* [Required VPC endpoints for AWS Systems Manager](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-systems-manager-vpc-endpoints/)
+* AWS CLI v2 with the [Session Manager plugin installed](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
+
 ## Preparation
 ### This recipe requires some “prep work” which deploys resources that you’ll build the solution on. You will use the AWS CDK to deploy these resources 
 
@@ -24,6 +37,118 @@ cdk deploy
 `cd ..`
 
 
+## Steps
+1. Create a file named assume-role-policy.json with the following content (file provided in the repository):
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+  {
+    "Effect": "Allow",
+    "Principal": {
+      "Service": "ec2.amazonaws.com"
+    },
+    "Action": "sts:AssumeRole"
+  }
+  ]
+}
+```
+
+2. Create an IAM role with the statement in the provided assume-role-policy.json file using this command:
+```
+ROLE_ARN=$(aws iam create-role --role-name AWSCookbook106SSMRole \
+     --assume-role-policy-document file://assume-role-policy.json \
+     --output text --query Role.Arn)
+   eiifccrckjintdrfblkfefnkifdfuufilcjjdhnlbrj
+```
+
+3. Attach the AmazonSSMManagedInstanceCore managed policy to the role so that the role allows access to AWS Systems Manager:
+```
+aws iam attach-role-policy --role-name AWSCookbook106SSMRole \
+     --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+```
+
+4. Create an instance profile:
+```
+aws iam create-instance-profile \
+     --instance-profile-name AWSCookbook106InstanceProfile
+```
+You should see output similar to the following:
+```
+{
+  "InstanceProfile": {
+    "Path": "/",
+    "InstanceProfileName": "AWSCookbook106InstanceProfile",
+    "InstanceProfileId": "(RandomString",
+    "Arn": "arn:aws:iam::111111111111:instance-profile/AWSCookbook106InstanceProfile",
+    "CreateDate": "2021-11-28T20:26:23+00:00",
+    "Roles": []
+  }
+}
+```
+
+5. Add the role that you created to the instance profile:
+```
+aws iam add-role-to-instance-profile \
+     --role-name AWSCookbook106SSMRole \
+     --instance-profile-name AWSCookbook106InstanceProfile
+```
+>NOTE: The EC2 instance profile contains a role that you create. The instance profile association with an instance allows it to define “who I am,” and the role defines “what I am permitted to do.” Both are required by IAM to allow an EC2 instance to communicate with other AWS services using the IAM service. You can get a list of instance profiles in your account by running the `aws iam list-instance-profiles` AWS CLI command.
+
+6. Query SSM for the latest Amazon Linux 2 AMI ID available in your Region and save it as an environment variable:
+```
+AMI_ID=$(aws ssm get-parameters --names \
+     /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2 \
+     --query 'Parameters[0].[Value]' --output text)
+```
+
+7. Launch an instance in one of your subnets that references the instance profile you created and also uses a `Name` tag that helps you identify the instance in the console:
+```
+INSTANCE_ID=$(aws ec2 run-instances --image-id $AMI_ID \
+     --count 1 \
+     --instance-type t3.nano \
+     --iam-instance-profile Name=AWSCookbook106InstanceProfile \
+     --subnet-id $SUBNET_1 \
+     --security-group-ids $INSTANCE_SG \
+     --metadata-options \
+HttpTokens=required,HttpPutResponseHopLimit=64,HttpEndpoint=enabled \
+     --tag-specifications \
+     'ResourceType=instance,Tags=[{Key=Name,Value=AWSCookbook106}]' \
+     'ResourceType=volume,Tags=[{Key=Name,Value=AWSCookbook106}]' \
+     --query Instances[0].InstanceId \
+     --output text)
+```
+> TIP: [EC2 instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html) is a feature you can use within your EC2 instance to access information about your EC2 instance over an HTTP endpoint from the instance itself. This is helpful for scripting and automation via [user data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instancedata-add-user-data.html). You should always use the latest version of instance metadata. In step 7, you did this by specifying the `--metadata-options` flag and providing the `HttpTokens=required` option that forces [IMDSv2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html).
+
+## Validation checks
+Ensure your EC2 instance has registered with SSM. Use the following command to check the status. This command should return the instance ID:
+```
+aws ssm describe-instance-information \
+     --filters Key=ResourceType,Values=EC2Instance \
+     --query "InstanceInformationList[].InstanceId" --output text
+```
+Connect to the EC2 instance by using SSM Session Manager:
+```
+aws ssm start-session --target $INSTANCE_ID
+```
+You should now be connected to your instance and see a bash prompt. From the bash prompt, run a command to validate you are connected to your EC2 instance by querying the metadata service for an IMDSv2 token and using the token to query metadata for the instance profile associated with the instance:
+```
+TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
+curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/iam/info
+```
+You should see output similar to the following:
+```
+{
+  "Code" : "Success",
+  "LastUpdated" : "2021-09-23T16:03:25Z",
+  "InstanceProfileArn" : "arn:aws:iam::111111111111:instance-profile/AWSCookbook106InstanceProfile",
+  "InstanceProfileId" : "AIPAZVTINAMEXAMPLE"
+}
+```
+Exit the Session Manager session:
+```
+exit
+```
 ## Clean up 
 
 ### Terminate the EC2 Instance:
