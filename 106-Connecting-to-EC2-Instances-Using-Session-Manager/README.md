@@ -32,6 +32,30 @@ cdk deploy
 aws ec2 terminate-instances --instance-ids $INSTANCE_ID
 ```
 
+### Detach the policy from the role:
+
+```
+aws iam detach-role-policy --role-name AWSCookbook106SSMRole --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+```
+
+### Remove the role from the instance profile:
+
+```
+aws iam remove-role-from-instance-profile --instance-profile-name AWSCookbook106InstanceProfile --role-name AWSCookbook106SSMRole
+```
+
+### Delete the instance profile:
+
+```
+aws iam delete-instance-profile --instance-profile-name AWSCookbook106InstanceProfile
+```
+
+### Delete the role:
+
+```
+aws iam delete-role --role-name AWSCookbook106SSMRole
+```
+
 ### Go to the cdk-AWS-Cookbook-106 directory:
 
 `cd cdk-AWS-Cookbook-106/`
