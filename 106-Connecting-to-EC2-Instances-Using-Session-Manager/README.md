@@ -9,7 +9,7 @@ Create an IAM role, attach the `AmazonSSMManagedInstanceCore` policy, create an 
 
 ![Figure 1.8](ConnectingToEC2InstancesUsingAWSSSMSessionManager.png)
 
-Prerequisites
+### Prerequisites
 * Amazon Virtual Private Cloud (VPC) with isolated or private subnets and associated route tables
 * [Required VPC endpoints for AWS Systems Manager](https://aws.amazon.com/premiumsupport/knowledge-center/ec2-systems-manager-vpc-endpoints/)
 * AWS CLI v2 with the [Session Manager plugin installed](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
