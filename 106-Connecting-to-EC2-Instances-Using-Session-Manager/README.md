@@ -7,7 +7,7 @@ You have an EC2 instance in a private subnet and need to connect to the instance
 ## Solution
 Create an IAM role, attach the `AmazonSSMManagedInstanceCore` policy, create an EC2 instance profile, attach the IAM role you created to the instance profile, associate the EC2 instance profile to an EC2 instance, and finally, run the `aws ssm start-session` command to connect to the instance. A logical flow of these steps is shown in Figure 1-8.
 
-![Figure 1.8](ConnectingToEC2InstancesUsingAWSSSMSession Manager.png)
+![Figure 1.8](ConnectingToEC2InstancesUsingAWSSSMSessionManager.png)
 
 Prerequisites
 * Amazon Virtual Private Cloud (VPC) with isolated or private subnets and associated route tables
