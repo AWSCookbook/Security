@@ -7,7 +7,7 @@ You have an EC2 instance in a private subnet and need to connect to the instance
 ## Solution
 Create an IAM role, attach the `AmazonSSMManagedInstanceCore` policy, create an EC2 instance profile, attach the IAM role you created to the instance profile, associate the EC2 instance profile to an EC2 instance, and finally, run the `aws ssm start-session` command to connect to the instance. A logical flow of these steps is shown in Figure 1-8.
 
-![Figure 1.8](/ConnectingToEC2InstancesUsingAWSSSMSession Manager.png)
+![Figure 1.8](ConnectingToEC2InstancesUsingAWSSSMSession Manager.png)
 
 Prerequisites
 * Amazon Virtual Private Cloud (VPC) with isolated or private subnets and associated route tables
@@ -202,3 +202,22 @@ unset INSTANCE_ID
 ### Use the AWS CDK to destroy the resources, deactivate your Python virtual environment, and go to the root of the chapter:
 
 `cdk destroy && deactivate && rm -r .venv/ && cd ../..`
+
+## Discussion
+When you use AWS SSM Session Manager to connect to EC2 instances, you eliminate your dependency on Secure Shell (SSH) over the internet for command-line access to your instances. Once you configure Session Manager for your instances, you can instantly connect to a bash shell session on Linux or a PowerShell session for Windows systems.
+
+> WARNING: SSM can log all commands and their output during a session. You can set a preference to stop the logging of sensitive data (e.g., passwords) with this command: `stty -echo; read passwd; stty echo;` There is more information in an [AWS article](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-logging.html) about logging session activity.
+
+Session Manager works by communicating with the AWS Systems Manager (SSM) API endpoints within the AWS Region you are using over HTTPS (TCP port 443). The agent on your instance registers with the SSM service at boot time. No inbound security group rules are needed for Session Manager functionality. We recommend configuring [VPC Endpoints for Session Manager](https://www.youtube.com/watch?v=cjSuHarpQJg) to avoid the need for internet traffic and the cost of Network Address Translation (NAT) gateways.
+
+Here are some examples of the increased security posture Session Manager provides:
+* No internet-facing TCP ports need to be allowed in security groups associated with instances.
+* You can run instances in private (or isolated) subnets without exposing them directly to the internet and still access them for management duties.
+* There is no need to create, associate, and manage SSH keys with instances.
+* There is no need to manage user accounts and passwords on instances.
+* You can delegate access to manage EC2 instances using IAM roles.
+
+> NOTE: Any tool like SSM that provides such powerful capabilities must be carefully audited. AWS provides information about [locking down permissions](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started-ssm-user-permissions.html) for the SSM user, and more information about [auditing session activity](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-auditing.html).
+
+### Challenge
+View the logs for a session and create an alert whenever the rm command is executed.
