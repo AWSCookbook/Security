@@ -19,7 +19,7 @@ cdk deploy
 
 `python helper.py`
 
-### Navigate up to the main directory for this recipe (out of the “cdk-AWS-Cookbook-207” directory):
+### Navigate up to the main directory for this recipe (out of the “cdk-AWS-Cookbook-106” directory):
 
 `cd ..`
 
