@@ -1,6 +1,5 @@
 # Connecting to EC2 Instances Using AWS SSM Session Manager
 
-
 ## Problem
 You have an EC2 instance in a private subnet and need to connect to the instance without using SSH over the internet. 
 
