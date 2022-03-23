@@ -35,7 +35,9 @@ cdk deploy
 
 ### Navigate up to the main directory for this recipe (out of the “cdk-AWS-Cookbook-106” directory):
 
-`cd ..`
+```
+cd ..
+```
 
 
 ## Steps
@@ -184,11 +186,15 @@ aws iam delete-role --role-name AWSCookbook106SSMRole
 
 ### Go to the cdk-AWS-Cookbook-106 directory:
 
-`cd cdk-AWS-Cookbook-106/`
+```
+cd cdk-AWS-Cookbook-106/
+```
 
 ### To clean up the environment variables, run the helper.py script in this recipe’s cdk- directory with the --unset flag, and copy the output to your terminal to export variables:
 
-`python helper.py --unset`
+```
+python helper.py --unset
+```
 
 ### Unset your manually created environment variables:
 
@@ -200,7 +206,9 @@ unset INSTANCE_ID
 
 ### Use the AWS CDK to destroy the resources, deactivate your Python virtual environment, and go to the root of the chapter:
 
-`cdk destroy && deactivate && rm -r .venv/ && cd ../..`
+```
+cdk destroy && deactivate && rm -r .venv/ && cd ../..
+```
 
 ## Discussion
 When you use AWS SSM Session Manager to connect to EC2 instances, you eliminate your dependency on Secure Shell (SSH) over the internet for command-line access to your instances. Once you configure Session Manager for your instances, you can instantly connect to a bash shell session on Linux or a PowerShell session for Windows systems.
