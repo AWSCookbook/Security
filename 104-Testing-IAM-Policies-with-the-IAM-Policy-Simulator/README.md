@@ -61,7 +61,7 @@ Simulate the effect of the IAM policy you are using, testing several different t
 Test the `ec2:CreateInternetGateway` action:
 ```
 aws iam simulate-principal-policy \
-     --policy-source-arn arn:aws:iam::$AWS_ACCOUNT_ARN:role/AWSCookbook104IamRole \
+     --policy-source-arn arn:aws:iam::$AWS_ACCOUNT_ID:role/AWSCookbook104IamRole \
      --action-names ec2:CreateInternetGateway
 ```
 
@@ -85,7 +85,7 @@ You should see output similar to the following (note the `EvalDecision`):
 Test the `ec2:DescribeInstances` action:
 ```
 aws iam simulate-principal-policy \
-     --policy-source-arn arn:aws:iam::$AWS_ACCOUNT_ARN:role/AWSCookbook104IamRole \
+     --policy-source-arn arn:aws:iam::$AWS_ACCOUNT_ID:role/AWSCookbook104IamRole \
      --action-names ec2:DescribeInstances
 ```
 
