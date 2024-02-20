@@ -15,7 +15,7 @@ class CdkAwsCookbook108Stack(Stack):
 
         isolated_subnets = ec2.SubnetConfiguration(
             name="ISOLATED",
-            subnet_type=ec2.SubnetType.ISOLATED,
+            subnet_type=ec2.SubnetType.PRIVATE_ISOLATED,
             cidr_mask=24
         )
 
@@ -33,7 +33,7 @@ class CdkAwsCookbook108Stack(Stack):
             private_dns_enabled=True,
             subnets=ec2.SubnetSelection(
                 one_per_az=False,
-                subnet_type=ec2.SubnetType.ISOLATED
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
             ),
         )
 
@@ -44,7 +44,7 @@ class CdkAwsCookbook108Stack(Stack):
             private_dns_enabled=True,
             subnets=ec2.SubnetSelection(
                 one_per_az=False,
-                subnet_type=ec2.SubnetType.ISOLATED
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
             ),
         )
 
@@ -54,7 +54,7 @@ class CdkAwsCookbook108Stack(Stack):
             private_dns_enabled=True,
             subnets=ec2.SubnetSelection(
                 one_per_az=False,
-                subnet_type=ec2.SubnetType.ISOLATED
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
             ),
         )
 
@@ -64,7 +64,7 @@ class CdkAwsCookbook108Stack(Stack):
             private_dns_enabled=True,
             subnets=ec2.SubnetSelection(
                 one_per_az=False,
-                subnet_type=ec2.SubnetType.ISOLATED
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
             ),
         )
 
